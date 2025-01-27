@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import RoomService from "@/services/roomService";
 import { Player } from "@/models/player";
 import { Room } from "@/models/room";
+import useToast from "@/hooks/useToast";
 
 const roomService = new RoomService();
 
@@ -27,6 +28,8 @@ export default function CrearPartida() {
   const [room, setRoom] = useState<Room | null>(null);
   const [playerName, setPlayerName] = useState("");
   const [selectedEmoji, setSelectedEmoji] = useState("😀");
+
+  const { successToast } = useToast();
 
   let roomCreated = false;
 
@@ -68,6 +71,7 @@ export default function CrearPartida() {
               className="bg-gray-100 p-4 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors relative"
               onClick={() => {
                 navigator.clipboard.writeText(room.code);
+                successToast("Código copiado al portapapeles");
               }}
             >
               <p className="text-sm text-gray-600 mb-2">Código de la partida</p>
