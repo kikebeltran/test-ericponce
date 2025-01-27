@@ -23,6 +23,7 @@ export default function PatataCaliente() {
   const [isThrown, setIsThrown] = useState(false);
   const [firstTimePatata, setFirstTimePatata] = useState(true);
   const [firstUser, setFirstUser] = useState(false);
+  const [randomMessage, setRandomMessage] = useState("");
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -76,7 +77,10 @@ export default function PatataCaliente() {
   }, [room]);
 
   const handleClickPotato = () => {
-    setFirstTimePatata(false);
+    setTimeout(() => {
+      setFirstTimePatata(false);
+      setRandomMessage(getRandomMessage());
+    }, 500);
 
     if (!room?.players || Object.keys(room.players).length < 2) return;
     if (room?.currentPlayer !== currentPlayer) return;
@@ -113,6 +117,22 @@ export default function PatataCaliente() {
       gameScore
     );
     roomService.endGame(room?.code as string);
+  };
+
+  const getRandomMessage = () => {
+    const messages = [
+      "Uooo, te ha vuelto la patata, dale!!",
+      "Cuidado que esto está que ardeeee 🔥",
+      "Dale dale, no te quedes parado",
+      "Mmmmm... que rica patata 🤤",
+      "Tic tac... tic tac... 🕰️",
+      "Toque, toque, toque... ☄️",
+      "Uffff, que poco le queda",
+      "Sabes que por cada 100 gramos, aportan 88 calorías, 18 gramos de hidratos de carbono, 2,5 gramos de proteínas, 2 gramos de fibra y un sorprendente 77,3 gramos de agua.",
+      "China es el mayor productor de patatas del mundo, pero pásala ya",
+      "¿Sabes que la patata es un tubérculo? Si, no?",
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
   };
 
   return (
@@ -152,8 +172,10 @@ export default function PatataCaliente() {
                 {room?.currentPlayer === currentPlayer
                   ? firstTimePatata && firstUser
                     ? "Empiezas con la patata, tócala para pasarla al siguiente jugador"
-                    : "Uooo, te ha vuelto la patata, dale!!"
-                  : "Tiene la patata: "}
+                    : firstTimePatata && !firstUser
+                    ? "Epaaa, te llegó el patatazo, tócala para pasarla"
+                    : randomMessage
+                  : "Espera... la patata la tiene "}
                 <span className="font-bold text-gray-900">
                   {room?.currentPlayer != currentPlayer &&
                     room?.players[room?.currentPlayer as any]?.name}
