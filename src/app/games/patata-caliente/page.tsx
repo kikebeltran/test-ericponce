@@ -20,6 +20,7 @@ export default function PatataCaliente() {
   const [gameDuration, setGameDuration] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState<string>("");
   const [potatoScale, setPotatoScale] = useState(1);
+  const [isThrown, setIsThrown] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -72,21 +73,25 @@ export default function PatataCaliente() {
 
   const handleClickPotato = () => {
     if (!room?.players || Object.keys(room.players).length < 2) return;
-
     if (room?.currentPlayer !== currentPlayer) return;
 
-    const playersArray = Object.values(room.players);
+    // Iniciar animación de lanzamiento
+    setIsThrown(true);
 
-    const currentPlayerIndex = playersArray.findIndex(
-      (p) => p.uuid === room.currentPlayer
-    );
+    // Esperar a que termine la animación antes de cambiar de jugador
+    setTimeout(() => {
+      const playersArray = Object.values(room.players);
+      const currentPlayerIndex = playersArray.findIndex(
+        (p) => p.uuid === room.currentPlayer
+      );
+      const nextPlayerIndex = (currentPlayerIndex + 1) % playersArray.length;
+      const nextPlayer = playersArray[nextPlayerIndex];
 
-    const nextPlayerIndex = (currentPlayerIndex + 1) % playersArray.length;
-    const nextPlayer = playersArray[nextPlayerIndex];
-
-    if (nextPlayer) {
-      roomService.setCurrentPlayer(room.code, nextPlayer.uuid);
-    }
+      if (nextPlayer) {
+        roomService.setCurrentPlayer(room.code, nextPlayer.uuid);
+      }
+      setIsThrown(false);
+    }, 300);
   };
 
   const endGame = () => {
@@ -157,8 +162,16 @@ export default function PatataCaliente() {
               {room?.currentPlayer === currentPlayer ? (
                 <div
                   onClick={() => handleClickPotato()}
-                  className="text-8xl cursor-pointer transition-all duration-1000"
-                  style={{ transform: `scale(${potatoScale})` }}
+                  className={`
+                    text-8xl cursor-pointer 
+                    transition-all duration-100 ease-in
+                    ${isThrown ? "translate-x-[100vw]" : ""}
+                  `}
+                  style={{
+                    transform: `scale(${potatoScale}) ${
+                      isThrown ? "translateX(100vw)" : ""
+                    }`,
+                  }}
                 >
                   <span className="text-5xl">🥔</span>
                 </div>
