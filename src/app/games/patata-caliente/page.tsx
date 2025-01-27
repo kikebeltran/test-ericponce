@@ -21,21 +21,25 @@ export default function PatataCaliente() {
   const [currentPlayer, setCurrentPlayer] = useState<string>("");
   const [potatoScale, setPotatoScale] = useState(1);
   const [isThrown, setIsThrown] = useState(false);
+  const [firstTimePatata, setFirstTimePatata] = useState(true);
+  const [firstUser, setFirstUser] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     setCurrentPlayer(utilsService.getCurrentPlayerUuid() || "");
 
-    console.log("🚀 ~ useEffect ~ timer:");
-
     if (!gameStarted && room?.game?.status === "ready") {
       setGameDuration(room?.game?.config?.time);
 
-      console.log("🚀 ~ useEffect ~ room:", room);
       if (room?.code && room?.players) {
         // Get first player from players object
         const firstPlayer = Object.values(room.players)[0];
+
+        if (firstPlayer.uuid === currentPlayer) {
+          setFirstUser(true);
+        }
+
         if (firstPlayer) {
           roomService.setCurrentPlayer(room.code, firstPlayer.uuid);
         }
@@ -72,6 +76,8 @@ export default function PatataCaliente() {
   }, [room]);
 
   const handleClickPotato = () => {
+    setFirstTimePatata(false);
+
     if (!room?.players || Object.keys(room.players).length < 2) return;
     if (room?.currentPlayer !== currentPlayer) return;
 
@@ -118,7 +124,8 @@ export default function PatataCaliente() {
               Patata Caliente
             </h1>
             <p className="text-gray-600">
-              Pulsa el botón cuando la patata y pásala al siguiente jugador
+              Pulsa la patata 🥔 y pásala al siguiente jugador antes de que
+              explote 💥
             </p>
             <p className="text-sm text-gray-500">
               Si puerdes sumas 0 points amigo.
@@ -143,7 +150,9 @@ export default function PatataCaliente() {
             <div className="text-center space-y-2">
               <p className="text-gray-600">
                 {room?.currentPlayer === currentPlayer
-                  ? "Tienes la patata, toca para pasarla al siguiente jugador"
+                  ? firstTimePatata && firstUser
+                    ? "Empiezas con la patata, tócala para pasarla al siguiente jugador"
+                    : "Uooo, te ha vuelto la patata, dale!!"
                   : "Tiene la patata: "}
                 <span className="font-bold text-gray-900">
                   {room?.currentPlayer != currentPlayer &&
