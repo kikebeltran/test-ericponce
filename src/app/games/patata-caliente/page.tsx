@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import RoomService from "@/services/roomService";
-import GameService from "@/services/gameService";
 import { useRoomRedirect } from "@/hooks/useRoomRedirect";
+import useToast from "@/hooks/useToast";
+import GameService from "@/services/gameService";
+import RoomService from "@/services/roomService";
 import UtilsService from "@/services/utilsService";
+import confetti from "canvas-confetti";
+import { useEffect, useState } from "react";
 
 const roomService = new RoomService();
 const gameService = new GameService();
@@ -24,6 +26,8 @@ export default function PatataCaliente() {
   const [firstTimePatata, setFirstTimePatata] = useState(true);
   const [firstUser, setFirstUser] = useState(false);
   const [randomMessage, setRandomMessage] = useState("");
+
+  const { errorToast } = useToast();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -60,6 +64,7 @@ export default function PatataCaliente() {
             clearInterval(timer);
             setGameFinished(true);
             endGame();
+
             return 0;
           }
 
@@ -83,7 +88,10 @@ export default function PatataCaliente() {
     }, 500);
 
     if (!room?.players || Object.keys(room.players).length < 2) return;
-    if (room?.currentPlayer !== currentPlayer) return;
+    if (room?.currentPlayer !== currentPlayer) {
+      errorToast("¡No puedes lanzar la patata!");
+      return;
+    }
 
     // Iniciar animación de lanzamiento
     setIsThrown(true);
@@ -105,6 +113,12 @@ export default function PatataCaliente() {
   };
 
   const endGame = () => {
+    confetti({
+      particleCount: 100,
+      spread: 100,
+      origin: { y: 0.7 },
+    });
+
     setGameFinished(true);
   };
 
@@ -196,11 +210,11 @@ export default function PatataCaliente() {
                   className={`
                     text-8xl cursor-pointer 
                     transition-all duration-100 ease-in
-                    ${isThrown ? "translate-x-[100vw]" : ""}
+                    ${isThrown ? "translate-x-[70vw]" : ""}
                   `}
                   style={{
                     transform: `scale(${potatoScale}) ${
-                      isThrown ? "translateX(100vw)" : ""
+                      isThrown ? "translateX(70vw)" : ""
                     }`,
                   }}
                 >
